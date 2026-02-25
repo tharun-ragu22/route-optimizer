@@ -1,0 +1,9 @@
+Given pt B is driveable from pt A
+When user puts A and B and time range they can leave
+Then system tells them the time to leave to spend minimal time driving
+And displays histogram of how long it could take if they leave at different times
+
+Given pt B is not driveable from pt A
+When user puts A and B and time range they can leave
+Then system tells them they cannot find a match
+
