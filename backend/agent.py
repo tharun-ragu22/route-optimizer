@@ -52,7 +52,7 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
                 "role":"system",
                 "content":
                 """
-                You are a traffic commute agent who understands traffic trends in different cities in Canada and the United States.
+                You are a traffic commute agent who understands traffic trends in different cities around the world.
                 You are also conscious of resource usage, and will never use resources like tool calls more than necessary.
 
                 The user will provide you a source address, a destination address, and a time range in which they can start their journey.

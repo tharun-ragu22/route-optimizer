@@ -28,3 +28,28 @@ async def test_get_best_time():
     data = response.json()
     # assert data["source"] == "San Francisco"
     assert "best_time" in data
+
+@pytest.mark.asyncio
+async def test_get_best_time_not_driveable():
+    # Given pt B is not driveable from pt A
+    print('starting test')
+    # return
+    transport = ASGITransport(app=app)
+    
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        
+        params = {
+            "src": "300 Kingston Rd, Pickering, ON L1V 1A2",
+            "dst": "28 Thomas St, The Liberties, Dublin, D08 VF83, Ireland",
+            "time_leave_min": "17:00",
+            "time_leave_max": "17:15",
+        }
+        # When user puts A and B and time range they can leavee
+        response = await client.get("/get_best_time", params=params)
+    
+    # Then system tells them they cannot find a match
+    print("response:", response)
+    assert response.status_code == 400
+    # data = response.json()
+    # # assert data["source"] == "San Francisco"
+    # assert "best_time" in data
