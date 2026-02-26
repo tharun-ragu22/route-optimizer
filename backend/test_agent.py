@@ -7,6 +7,8 @@ from main import app
 @pytest.mark.asyncio
 async def test_get_best_time():
     # Given pt B is driveable from pt A
+    print('starting test')
+    # return
     transport = ASGITransport(app=app)
     
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -21,6 +23,7 @@ async def test_get_best_time():
         response = await client.get("/get_best_time", params=params)
     
     # Then system tells them the time to leave to spend minimal time driving
+    print("response:", response)
     assert response.status_code == 200
     data = response.json()
     # assert data["source"] == "San Francisco"

@@ -9,24 +9,31 @@ from pydantic import BaseModel, Field
 from datetime import date
 from typing import List
 from geocoder import geocode
+import time
 
 load_dotenv()
 
 TOMTOM_KEY = os.getenv("TOMTOM_API_KEY")
-def get_duration_from_api(src: str, dst: str, depart_hr: int, depart_min: int, depart_sec: int) -> int:
+def get_duration_from_api(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
     # get the lat, lng for both src and dst
+    print("getting duration for", src, dst, depart_hr, depart_min)
     src_lat, src_lng = geocode(src)
     dst_lat, dst_lng = geocode(dst)
 
     format = lambda x : f"{'0' if x < 10 else ''}{x}"
 
-    depart_time = f"{format(depart_hr)}:{format(depart_min)}:{format(depart_sec)}"
+    depart_time = f"{format(depart_hr)}:{format(depart_min)}:00"
 
     # use api to see get how long it takes
     TRAFFIC_URL = f"https://api.tomtom.com/routing/1/calculateRoute/{src_lat},{src_lng}:{dst_lat},{dst_lng}/json?key={TOMTOM_KEY}&departAt={date.today().isoformat()}T{depart_time}&traffic=true"
     traffic_response = requests.get(TRAFFIC_URL)
 
     traffic_data = traffic_response.json()
+    if "routes" not in traffic_data:
+        print(src, dst, depart_hr, depart_min, ': Error in tomtom query / could not get route')
+        print(traffic_data)
+        return 10000000000
+    time.sleep(0.5)
 
     return traffic_data["routes"][0]["summary"]["travelTimeInSeconds"]//60
 
