@@ -6,6 +6,8 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from duration_getter import get_duration_from_api
+import time
+from constants import ERR_CODE
 
 load_dotenv()
 
@@ -28,7 +30,14 @@ def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
     depart_hr represents the hour in a 24 hour time system (e.g. 17 instead of 5pm)
 
     """
-    return get_duration_from_api(src, dst, depart_hr, depart_min)
+    
+    res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+    for i in range(3):
+        if res == ERR_CODE:
+            time.sleep(0.5 * 2 ** i)
+        res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+    return res
+        
 
 tools = [get_duration]
 agent = create_agent(llm, tools, response_format=AgentResponse)  
