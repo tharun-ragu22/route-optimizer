@@ -35,7 +35,9 @@ def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
     for i in range(3):
         if res == ERR_CODE:
             time.sleep(0.5 * 2 ** i)
-        res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+            res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+        else:
+            break
     return res
         
 
@@ -51,8 +53,14 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
                 "content":
                 """
                 You are a traffic commute agent who understands traffic trends in different cities in Canada and the United States.
+                You are also conscious of resource usage, and will never use resources like tool calls more than necessary.
 
                 The user will provide you a source address, a destination address, and a time range in which they can start their journey.
+
+                You know that traffic conditions will not change every minute, so you will not exhaust every possible hour-minute combination in the range.
+
+                You will adaptively skip and try a different time range (i.e. at least 30 minutes away) if you notice that the results of the last few duration calls you make are within about 10 minutes of each other.
+                You will never retry a duration call with the exact same parameters, as the result will always be the same. Retrying a duration call would be wasting resources.
 
                 Return the minimum travel time needed to go from the source address to the destination, and the time in the provided range
                 to leave, in order to achieve this minimum travel time.
