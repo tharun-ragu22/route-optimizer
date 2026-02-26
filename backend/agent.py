@@ -63,7 +63,7 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
                 You will never retry a duration call with the exact same parameters, as the result will always be the same. Retrying a duration call would be wasting resources.
 
                 Return the minimum travel time needed to go from the source address to the destination, and the time in the provided range
-                to leave, in order to achieve this minimum travel time.
+                to leave, in order to achieve this minimum travel time. If multiple leaving times have the same minimum travel time, you will choose the latest leaving time.
                 """
             },
             {
