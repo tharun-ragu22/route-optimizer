@@ -10,12 +10,12 @@ from datetime import date
 from typing import List
 from geocoder import geocode
 import time
-from constants import ERR_CODE
+from constants import RATE_LIMIT_ERROR, NO_ROUTE_FOUND_ERROR
 
 load_dotenv()
 
 TOMTOM_KEY = os.getenv("TOMTOM_API_KEY")
-def get_duration_from_api(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
+def get_duration_from_external_api(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
     # get the lat, lng for both src and dst
     print("getting duration for", src, dst, depart_hr, depart_min)
     src_lat, src_lng = geocode(src)
@@ -30,10 +30,12 @@ def get_duration_from_api(src: str, dst: str, depart_hr: int, depart_min: int) -
     traffic_response = requests.get(TRAFFIC_URL)
 
     traffic_data = traffic_response.json()
-    if "routes" not in traffic_data:
+    if "detailedError" in traffic_data:
         print(src, dst, depart_hr, depart_min, ': Error in tomtom query / could not get route')
         print(traffic_data)
-        return ERR_CODE
+        if "NO_ROUTE_FOUND" in traffic_data['detailedError']['message']:
+            return NO_ROUTE_FOUND_ERROR
+        return RATE_LIMIT_ERROR
     time.sleep(0.5)
 
     res = traffic_data["routes"][0]["summary"]["travelTimeInSeconds"]//60
@@ -44,4 +46,4 @@ if __name__ == "__main__":
     src = "300 Kingston Rd, Pickering, ON L1V 1A2"
     dst = "742 Kingston Rd, Pickering, ON L1V 1G4"
 
-    print(get_duration_from_api(src, dst, 17, 5, 1))
+    print(get_duration_from_external_api(src, dst, 17, 5, 1))

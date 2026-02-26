@@ -5,9 +5,9 @@ from langchain.agents import create_agent
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from duration_getter import get_duration_from_api
+from duration_getter import get_duration_from_external_api
 import time
-from constants import ERR_CODE
+from constants import RATE_LIMIT_ERROR, NO_ROUTE_FOUND_ERROR
 
 load_dotenv()
 
@@ -31,14 +31,28 @@ def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
 
     """
     
-    res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+    res =  get_duration_from_external_api(src, dst, depart_hr, depart_min)
     for i in range(3):
-        if res == ERR_CODE:
+        if res == RATE_LIMIT_ERROR:
             time.sleep(0.5 * 2 ** i)
-            res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+            res =  get_duration_from_external_api(src, dst, depart_hr, depart_min)
         else:
             break
     return res
+
+
+def is_driveable(src:str, dst: str) -> bool:
+    """Determines if it possible to drive from the source address to the destination address, by car"""
+    res = get_duration_from_external_api(src, dst, 0, 0)
+    for i in range(3):
+        if res == NO_ROUTE_FOUND_ERROR:
+            return False
+        if res != RATE_LIMIT_ERROR:
+            return True
+        time.sleep(0.5 * 2 ** i)
+        res = get_duration_from_external_api(src, dst, 0, 0)
+
+    return False
         
 
 tools = [get_duration]
@@ -46,18 +60,21 @@ agent = create_agent(llm, tools, response_format=AgentResponse)
 
 def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) -> int:
     
+    if not is_driveable(src, dst):
+        return NO_ROUTE_FOUND_ERROR
     result = agent.invoke({
         "messages": [
             {
                 "role":"system",
                 "content":
                 """
-                You are a traffic commute agent who understands traffic trends in different cities in Canada and the United States.
+                You are a traffic commute agent who understands traffic trends in different cities around the world.
                 You are also conscious of resource usage, and will never use resources like tool calls more than necessary.
 
                 The user will provide you a source address, a destination address, and a time range in which they can start their journey.
 
                 You know that traffic conditions will not change every minute, so you will not exhaust every possible hour-minute combination in the range.
+                You will only ever make duration calls for leaving times 15 minutes apart from each other.
 
                 You will adaptively skip and try a different time range (i.e. at least 30 minutes away) if you notice that the results of the last few duration calls you make are within about 10 minutes of each other.
                 You will never retry a duration call with the exact same parameters, as the result will always be the same. Retrying a duration call would be wasting resources.
