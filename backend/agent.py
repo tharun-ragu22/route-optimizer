@@ -5,7 +5,7 @@ from langchain.agents import create_agent
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from duration_getter import get_duration_from_api
+from duration_getter import get_duration_from_external_api
 import time
 from constants import ERR_CODE
 
@@ -31,11 +31,11 @@ def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
 
     """
     
-    res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+    res =  get_duration_from_external_api(src, dst, depart_hr, depart_min)
     for i in range(3):
         if res == ERR_CODE:
             time.sleep(0.5 * 2 ** i)
-            res =  get_duration_from_api(src, dst, depart_hr, depart_min)
+            res =  get_duration_from_external_api(src, dst, depart_hr, depart_min)
         else:
             break
     return res

@@ -15,7 +15,7 @@ from constants import ERR_CODE
 load_dotenv()
 
 TOMTOM_KEY = os.getenv("TOMTOM_API_KEY")
-def get_duration_from_api(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
+def get_duration_from_external_api(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
     # get the lat, lng for both src and dst
     print("getting duration for", src, dst, depart_hr, depart_min)
     src_lat, src_lng = geocode(src)
@@ -44,4 +44,4 @@ if __name__ == "__main__":
     src = "300 Kingston Rd, Pickering, ON L1V 1A2"
     dst = "742 Kingston Rd, Pickering, ON L1V 1G4"
 
-    print(get_duration_from_api(src, dst, 17, 5, 1))
+    print(get_duration_from_external_api(src, dst, 17, 5, 1))
