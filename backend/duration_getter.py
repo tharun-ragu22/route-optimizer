@@ -10,7 +10,7 @@ from datetime import date
 from typing import List
 from geocoder import geocode
 import time
-from constants import ERR_CODE
+from constants import RATE_LIMIT_ERROR, NO_ROUTE_FOUND_ERROR
 
 load_dotenv()
 
@@ -30,10 +30,12 @@ def get_duration_from_external_api(src: str, dst: str, depart_hr: int, depart_mi
     traffic_response = requests.get(TRAFFIC_URL)
 
     traffic_data = traffic_response.json()
-    if "routes" not in traffic_data:
+    if "detailedError" in traffic_data:
         print(src, dst, depart_hr, depart_min, ': Error in tomtom query / could not get route')
         print(traffic_data)
-        return ERR_CODE
+        if "NO_ROUTE_FOUND" in traffic_data['detailedError']['message']:
+            return NO_ROUTE_FOUND_ERROR
+        return RATE_LIMIT_ERROR
     time.sleep(0.5)
 
     res = traffic_data["routes"][0]["summary"]["travelTimeInSeconds"]//60
