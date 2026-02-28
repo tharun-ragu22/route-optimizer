@@ -41,7 +41,7 @@ describe('MapSearch Component', () => {
     const user = userEvent.setup();
 
     const placeholderText = "Search for a location..."
-    render(<MapSearch placeholderText={placeholderText} onSelectLocation={() => {}}/>);
+    render(<MapSearch placeholderText={placeholderText} onSelectLocation={jest.fn}/>);
 
     const input = await screen.findByPlaceholderText(placeholderText);
     
