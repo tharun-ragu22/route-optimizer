@@ -10,15 +10,6 @@ jest.mock('use-places-autocomplete', () => {
   return {
     __esModule: true,
     default: jest.fn(),
-    getGeocode: jest.fn().mockResolvedValue([
-    {
-      formatted_address: '300 Kingston Rd, Pickering, ON',
-      geometry: {
-        location: { lat: 43.8375, lng: -79.0837 }
-      }
-    }
-  ]),
-  getLatLng: jest.fn().mockResolvedValue({ lat: 43.8375, lng: -79.0837 }),
   };
 });
 
@@ -48,10 +39,11 @@ describe('MapSearch Component', () => {
 
   it('updates the text box with the address when the user types', async () => {
     const user = userEvent.setup();
-    const onSelectMock = jest.fn(); // Define this so the test can track it
-    render(<MapSearch onSelectLocation={onSelectMock} />);
 
-    const input = await screen.findByPlaceholderText("Search for a location...");
+    const placeholderText = "Search for a location..."
+    render(<MapSearch placeholderText={placeholderText} />);
+
+    const input = await screen.findByPlaceholderText(placeholderText);
     
     // Type into the input
     await user.type(input, '300 Kingston Rd');
