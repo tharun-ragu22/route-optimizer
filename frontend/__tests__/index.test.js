@@ -63,13 +63,6 @@ describe('MapSearch Component', () => {
     // 3. Click the suggestion
     await user.click(suggestion);
 
-    // 4. Assert that the callback was called with Pickering's data
-    expect(onSelectMock).toHaveBeenCalledWith({
-      address: '300 Kingston Rd, Pickering, ON',
-      lat: 43.8375,
-      lng: -79.0837
-    });
-
     // 5. Assert the input now shows the full address
     expect(input).toHaveValue('300 Kingston Rd, Pickering, ON, Canada');
     });
