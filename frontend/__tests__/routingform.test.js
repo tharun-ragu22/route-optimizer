@@ -40,29 +40,41 @@ describe('RoutingForm Component', () => {
     });
 
     it('submits form when info is correct', async () => {
+        // Given the user has filled out source and destination
         const user = userEvent.setup();
-        const mockSubmit = jest.fn()
+        const mockSubmit = jest.fn();
         render(<RoutingForm onSubmit={mockSubmit}/>);
-        
-
-        
         const sourceContainer= await screen.getByTestId('source-wrapper')
         const sourceInput = await screen.findByPlaceholderText("Source Address");
-        // const destinationInput = await screen.findByPlaceholderText("Destination Address");
         
-        // Type into the input
         await user.type(sourceInput, '300 Kingston Rd');
         const suggestion = await within(sourceContainer).findByText(/300/i);
         await user.click(suggestion);
+
+        const destinationContainer= await screen.getByTestId('destination-wrapper')
+        const destinationInput = await screen.findByPlaceholderText("Destination Address");
         
-        // Click the submit button
+        
+        await user.type(destinationInput, '750 Kingston Rd');
+        const destinationSuggestion = await within(destinationContainer).findByText(/750/i);
+        await user.click(destinationSuggestion);
+
+        // And source to destination is driveable
+        // And user selects time range
+
+        const leaveTimeMin = await screen.getByTestId('leave-time-min')
+        await user.type(leaveTimeMin, '17:00')
+        const leaveTimeMax = await screen.getByTestId('leave-time-max')
+        await user.type(leaveTimeMax, '17:30')
+
+        // and time range is correct
+        // When user hits submit
+
         const button = screen.getByRole('button', { name: "Submit" });
         await user.click(button);
-
+        // Then they get the minimum time
+        
         // Assert that the mock was called once
         expect(mockSubmit).toHaveBeenCalledTimes(1);
-        
-        // Assert it was called with the right object structure
-        // expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({address: '300 Kingston Rd'}));
     });
 });

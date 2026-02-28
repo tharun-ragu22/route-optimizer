@@ -14,3 +14,10 @@ Then the formatted address is in the text box
 Given a user has selected source text box
 When they select a point on the map
 Then the formatted address is in the text box
+
+Given the user has filled out source and destination
+And source to destination is driveable
+And user selects time range
+and time range is correct
+When user hits submit
+Then they get the minimum time

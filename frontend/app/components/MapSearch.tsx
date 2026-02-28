@@ -1,8 +1,8 @@
 'use client';
 
-import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
+import usePlacesAutocomplete from 'use-places-autocomplete';
 
-export default function MapSearch({ placeholderText }: { placeholderText: string }) {
+export default function MapSearch({ placeholderText, onSelectLocation }: { placeholderText: string, onSelectLocation: (address: string | null) => void }) {
   const {
     ready,
     value,
@@ -16,6 +16,7 @@ export default function MapSearch({ placeholderText }: { placeholderText: string
   const handleSelect = async (address: string) => {
     setValue(address, false);
     clearSuggestions();
+    onSelectLocation(address)
   };
 
   return (
