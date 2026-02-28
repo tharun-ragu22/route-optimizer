@@ -63,8 +63,11 @@ describe('RoutingForm Component', () => {
         // And user selects time range
 
         const leaveTimeMin = await screen.getByTestId('leave-time-min')
+        await user.clear(leaveTimeMin);
         await user.type(leaveTimeMin, '17:00')
+
         const leaveTimeMax = await screen.getByTestId('leave-time-max')
+        await user.clear(leaveTimeMax);
         await user.type(leaveTimeMax, '17:30')
 
         // and time range is correct
@@ -102,8 +105,11 @@ describe('RoutingForm Component', () => {
         // And user selects time range
 
         const leaveTimeMin = await screen.getByTestId('leave-time-min')
+        await user.clear(leaveTimeMin);
         await user.type(leaveTimeMin, '17:30')
+
         const leaveTimeMax = await screen.getByTestId('leave-time-max')
+        await user.clear(leaveTimeMax);
         await user.type(leaveTimeMax, '17:00')
 
         // and time range is correct
