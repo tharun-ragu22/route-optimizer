@@ -2,7 +2,7 @@
 
 import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
 
-export default function MapSearch() {
+export default function MapSearch({ placeholderText }: { placeholderText: string }) {
   const {
     ready,
     value,
@@ -24,7 +24,7 @@ export default function MapSearch() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         disabled={!ready}
-        placeholder="Search for a location..."
+        placeholder={placeholderText}
         className="w-full p-2 border rounded shadow-sm text-black"
       />
       {status === 'OK' && (
