@@ -2,7 +2,7 @@
 
 import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
 
-export default function MapSearch({ onSelectLocation }) {
+export default function MapSearch() {
   const {
     ready,
     value,
@@ -16,14 +16,6 @@ export default function MapSearch({ onSelectLocation }) {
   const handleSelect = async (address: string) => {
     setValue(address, false);
     clearSuggestions();
-
-    try {
-      const results = await getGeocode({ address });
-      const { lat, lng } = await getLatLng(results[0]);
-      onSelectLocation({ lat, lng, address });
-    } catch (error) {
-      console.error("Error fetching coordinates:", error);
-    }
   };
 
   return (
