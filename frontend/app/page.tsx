@@ -18,10 +18,6 @@ export default function Home() {
           <RoutingForm onSubmit={handleSubmit}/>
           </LoadScript>
         </div>
-        
-
-
-        
       </main>
     </div>
   );
