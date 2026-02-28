@@ -12,8 +12,13 @@ export default function RoutingForm({ onSubmit }: { onSubmit: () => void }) {
                 e.preventDefault();
                 onSubmit();
             }}>
-                <MapSearch placeholderText="Source Address"/>
-                <MapSearch placeholderText="Destination Address"/>
+                <div data-testid="source-wrapper">
+                    <MapSearch placeholderText="Source Address"/>
+                </div>
+                
+                <div data-testid="destination-wrapper">
+                    <MapSearch placeholderText="Destination Address"/>
+                </div>
                 <input type="submit" value="Submit" />
 
             </form>
