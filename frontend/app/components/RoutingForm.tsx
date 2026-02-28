@@ -1,20 +1,22 @@
+'use client'
 import { LoadScript } from "@react-google-maps/api";
 import MapSearch from "./MapSearch";
+import React from "react";
 
-export default function RoutingForm() {
-    const libraries: ("places")[] = ["places"];
+export default function RoutingForm({ onSubmit }: { onSubmit: () => void }) {
+    
     
     return (
-        <LoadScript
-          googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ""}
-          libraries={libraries}
-        >
-            <form>
-                <MapSearch/>
-                <MapSearch/>
+        
+            <form onSubmit={(e) => {
+                e.preventDefault();
+                onSubmit();
+            }}>
+                <MapSearch placeholderText="Source Address"/>
+                <MapSearch placeholderText="Destination Address"/>
+                <input type="submit" value="Submit" />
 
             </form>
-        </LoadScript>
     )
     
 }
