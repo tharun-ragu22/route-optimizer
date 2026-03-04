@@ -4,7 +4,7 @@ import MapSearch from "./MapSearch";
 
 export const sample = () => {console.log('submitted form')};
 
-export default function RoutingForm({ onSubmit = sample}: { onSubmit: () => void }) {
+export default function RoutingForm({ onSubmit = sample}: { onSubmit: (src: string, dst: string, time_leave_min: string, time_leave_max: string) => void }) {
     const [source, setSource] = useState<string | null>(null);
     const [destination, setDestination] = useState<string | null>(null);
 
@@ -20,15 +20,15 @@ export default function RoutingForm({ onSubmit = sample}: { onSubmit: () => void
       return false;
     };
     const validateInput = () => {
-      return time1LessThanTime2(minTime, maxTime);
+      return source != null && destination != null && time1LessThanTime2(minTime, maxTime);
     };
 
     return (
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           if (validateInput()) {
-            onSubmit();
+            await onSubmit(source!, destination!, minTime, maxTime);
           }
         }}
       >
