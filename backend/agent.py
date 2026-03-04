@@ -23,7 +23,7 @@ llm = ChatGoogleGenerativeAI(
 )
 TOMTOM_KEY = os.getenv("TOMTOM_API_KEY")
 @tool
-def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> int:
+def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> AgentResponse:
     """
     Get how long it takes to travel from the source address to the destination address, if the trip starts at depart_hr:depart_min:depart_sec
 

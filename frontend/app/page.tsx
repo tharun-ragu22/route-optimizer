@@ -23,8 +23,8 @@ export default function Home() {
       const data = await response.json();
       console.log(data)
 
-      setBestTime(data.best_time.best_time);
-      setExpectedDuration(data.best_time.duration);
+      setBestTime(data.best_time);
+      setExpectedDuration(data.expected_duration);
       
     } finally {
       setHasSubmittedOnce(true);

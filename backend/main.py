@@ -36,7 +36,7 @@ def get_best_time_endpoint(
     res = get_best_time(src, dst, time_leave_min, time_leave_max)
     if res == NO_ROUTE_FOUND_ERROR:
         raise HTTPException(status_code=400, detail=f"No route found between {src} and {dst}")
-    return {'best_time': res}
+    return {'best_time': res.best_time, 'expected_duration': res.duration}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
