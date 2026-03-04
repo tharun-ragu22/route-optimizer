@@ -41,5 +41,6 @@ test('short trip', async ({page}) => {
   
   // Then the user will get an answer, when to leave and how long it will take  
   await expect(page.getByText(/Time to leave: \d+/i)).toBeVisible({timeout: 150000})
+  await expect(page.getByText(/Expected duration: \d+/i)).toBeVisible({timeout: 150000})
 
 });

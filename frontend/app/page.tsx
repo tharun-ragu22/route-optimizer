@@ -8,6 +8,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [hasSubmittedOnce, setHasSubmittedOnce] = useState(false);
   const [bestTime, setBestTime] = useState("");
+  const [expectedDuration, setExpectedDuration] = useState("");
   const handleSubmit = async (src: string, dst: string, time_leave_min: string, time_leave_max: string) => {
     console.log("form submitted");
     setIsLoading(true);
@@ -23,6 +24,7 @@ export default function Home() {
       console.log(data)
 
       setBestTime(data.best_time.best_time);
+      setExpectedDuration(data.best_time.duration);
       
     } finally {
       setHasSubmittedOnce(true);
@@ -42,7 +44,7 @@ export default function Home() {
             <RoutingForm onSubmit={handleSubmit}/>
           </LoadScript>
           {hasSubmittedOnce && !isLoading && <p>Time to leave: {bestTime}</p>}
-          {hasSubmittedOnce && !isLoading && <p>Expected duration: </p>}
+          {hasSubmittedOnce && !isLoading && <p>Expected duration: {expectedDuration} minutes</p>}
         </div>
       </main>
     </div>
