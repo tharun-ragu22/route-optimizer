@@ -41,7 +41,7 @@ export default function Home() {
           googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ""}
           libraries={libraries}
           >
-            <RoutingForm onSubmit={handleSubmit}/>
+            <RoutingForm onSubmit={handleSubmit} isLoading={isLoading}/>
           </LoadScript>
           {hasSubmittedOnce && !isLoading && <p>Time to leave: {bestTime}</p>}
           {hasSubmittedOnce && !isLoading && <p>Expected duration: {expectedDuration} minutes</p>}

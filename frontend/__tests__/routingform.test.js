@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, act, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RoutingForm from '@/app/components/RoutingForm';
-import React from 'react';
+import React, {useState} from 'react';
 
 // We mock the hook but use a local React state inside the mock 
 // to ensure the component re-renders when setValue is called.
@@ -122,4 +122,69 @@ describe('RoutingForm Component', () => {
         // Assert that the mock was called once
         expect(mockSubmit).toHaveBeenCalledTimes(0);
     });
+    it('hides submit when form is loading', async () => {
+        // Given user has filled form correctly
+        
+        const user = userEvent.setup();
+        
+
+        
+        const TestRoutingFormWrapper = () => {
+            const [loading, setLoading] = useState(false);
+            
+            const handleInternalSubmit = async () => {
+                setLoading(true);
+                // Simulate the API delay
+                await new Promise((resolve) => {
+                    // We attach the resolver to the window so the test can trigger it
+                    window.resolveSubmit = resolve;
+                });
+                setLoading(false)
+            };
+
+            return <RoutingForm onSubmit={handleInternalSubmit} isLoading={loading} />;
+        };
+
+        render(<TestRoutingFormWrapper />);
+        const sourceContainer= await screen.getByTestId('source-wrapper')
+        const sourceInput = await screen.findByPlaceholderText("Source Address");
+        
+        await user.type(sourceInput, '300 Kingston Rd');
+        const suggestion = await within(sourceContainer).findByText(/300/i);
+        await user.click(suggestion);
+
+        const destinationContainer= await screen.getByTestId('destination-wrapper')
+        const destinationInput = await screen.findByPlaceholderText("Destination Address");
+        
+        
+        await user.type(destinationInput, '750 Kingston Rd');
+        const destinationSuggestion = await within(destinationContainer).findByText(/750/i);
+        await user.click(destinationSuggestion);
+
+        const leaveTimeMin = await screen.getByTestId('leave-time-min')
+        await user.clear(leaveTimeMin);
+        await user.type(leaveTimeMin, '17:00')
+
+        const leaveTimeMax = await screen.getByTestId('leave-time-max')
+        await user.clear(leaveTimeMax);
+        await user.type(leaveTimeMax, '17:30')
+
+        // When they click submit
+        const button = screen.getByRole('button', { name: "Submit" });
+        await user.click(button);
+        // Then the submit button should disappear
+        
+        expect(button).not.toBeVisible();
+        expect(await screen.getByText(/Loading result.../i)).toBeVisible()
+        
+        // And reappear when the form has loaded
+
+        await act(async () => {
+            window.resolveSubmit();
+        });
+
+        const reappearedButton = await screen.findByRole('button', { name: "Submit" });
+        expect(reappearedButton).toBeInTheDocument();
+        
+    })
 });
