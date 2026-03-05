@@ -31,8 +31,11 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit:
             await onSubmit(source!, destination!, minTime, maxTime);
           }
         }}
+
+        className="space-y-3"
+        
       >
-        <div data-testid="source-wrapper">
+        <div data-testid="source-wrapper" >
           <MapSearch
             placeholderText="Source Address"
             onSelectLocation={setSource}
@@ -67,7 +70,7 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit:
             onChange={(e) => setMaxTime(e.target.value)}
           />
         </div>
-        {!isLoading && <input type="submit" value="Submit" />}
+        {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
         {isLoading && <p>Loading result...</p>}
       </form>
     );
