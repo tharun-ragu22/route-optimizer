@@ -35,13 +35,16 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+        <h1>Route Optimizer</h1>
+
+        <h3>Find the best time to leave to avoid traffic.</h3>
         
         <div className="p-10">
           <LoadScript
           googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ""}
           libraries={libraries}
           >
-            <RoutingForm onSubmit={handleSubmit}/>
+            <RoutingForm onSubmit={handleSubmit} isLoading={isLoading}/>
           </LoadScript>
           {hasSubmittedOnce && !isLoading && <p>Time to leave: {bestTime}</p>}
           {hasSubmittedOnce && !isLoading && <p>Expected duration: {expectedDuration} minutes</p>}

@@ -4,7 +4,7 @@ import MapSearch from "./MapSearch";
 
 export const sample = () => {console.log('submitted form')};
 
-export default function RoutingForm({ onSubmit = sample}: { onSubmit: (src: string, dst: string, time_leave_min: string, time_leave_max: string) => void }) {
+export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit: (src: string, dst: string, time_leave_min: string, time_leave_max: string) => void, isLoading: boolean }) {
     const [source, setSource] = useState<string | null>(null);
     const [destination, setDestination] = useState<string | null>(null);
 
@@ -31,8 +31,11 @@ export default function RoutingForm({ onSubmit = sample}: { onSubmit: (src: stri
             await onSubmit(source!, destination!, minTime, maxTime);
           }
         }}
+
+        className="space-y-3"
+        
       >
-        <div data-testid="source-wrapper">
+        <div data-testid="source-wrapper" >
           <MapSearch
             placeholderText="Source Address"
             onSelectLocation={setSource}
@@ -67,7 +70,8 @@ export default function RoutingForm({ onSubmit = sample}: { onSubmit: (src: stri
             onChange={(e) => setMaxTime(e.target.value)}
           />
         </div>
-        <input type="submit" value="Submit" />
+        {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
+        {isLoading && <p>Loading result...</p>}
       </form>
     );
     
