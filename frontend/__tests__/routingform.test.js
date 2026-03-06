@@ -1,13 +1,13 @@
 import '@testing-library/jest-dom';
-import { render, screen, within, act, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, within, act, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RoutingForm from '@/app/components/RoutingForm';
 import React, {useState} from 'react';
+
 
 // We mock the hook but use a local React state inside the mock 
 // to ensure the component re-renders when setValue is called.
 jest.mock('use-places-autocomplete', () => {
-  return {
+    return {
     __esModule: true,
     default: jest.fn(),
     
@@ -15,6 +15,34 @@ jest.mock('use-places-autocomplete', () => {
 });
 
 import usePlacesAutocomplete from 'use-places-autocomplete';
+
+jest.mock('../app/components/MapDisplay', () => {
+    return function MockMap() {
+        return <div data-testid="tomtom-map" />;
+    };
+});
+import RoutingForm from '@/app/components/RoutingForm';
+
+// // Mock the TomTom library
+// At the top of mapdisplay.test.js
+jest.mock('@tomtom-org/maps-sdk/map', () => {
+    const mMarker = {
+        setLngLat: jest.fn().mockReturnThis(),
+        addTo: jest.fn().mockReturnThis(),
+        remove: jest.fn().mockReturnThis(),
+    };
+
+    return {
+        TomTomMap: jest.fn().mockImplementation(() => ({
+            on: jest.fn(),
+            remove: jest.fn(),
+            addControl: jest.fn(),
+        })),
+        TomTomMarker: jest.fn(() => mMarker), // Add this!
+    };
+});
+
+
 
 describe('RoutingForm Component', () => {
     beforeEach(() => {
@@ -186,5 +214,35 @@ describe('RoutingForm Component', () => {
         const reappearedButton = await screen.findByRole('button', { name: "Submit" });
         expect(reappearedButton).toBeInTheDocument();
         
+    })
+
+    it('adds source point to map when populated in form', async () => {
+        // Given the user has put a source address
+        const user = userEvent.setup();
+        render(<RoutingForm />)
+
+        const mapContainer = screen.getByTestId('tomtom-map');
+    
+        const sourceContainer= await screen.getByTestId('source-wrapper')
+        const sourceInput = await screen.findByPlaceholderText("Source Address");
+                
+        await user.type(sourceInput, '300 Kingston Rd');
+        
+        // When they enter it
+        const suggestion = await within(sourceContainer).findByText(/300/i);
+        await user.click(suggestion);
+        // Then the point should show on the map
+
+        const { TomTomMarker } = require('@tomtom-org/maps-sdk/map');
+    
+        await waitFor(() => {
+            expect(TomTomMarker).toHaveBeenCalled();
+        });
+
+        // 5. OPTIONAL: Check if it was placed at the right coordinates
+        const markerInstance = TomTomMarker.mock.results[0].value;
+        // Assuming your mock data returns these coordinates for 300 Kingston Rd
+        expect(markerInstance.setLngLat).toHaveBeenCalled();
+
     })
 });
