@@ -19,9 +19,12 @@ interface RoutingFormProps {
 }
 
 export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingFormProps) {
-    const [source, setSource] = useState<string | null>(null);
-    const [destination, setDestination] = useState<string | null>(null);
+    const [sourceAddress, setSourceAddress] = useState<string | null>(null);
+    const [destinationAddress, setDestinationAddress] = useState<string | null>(null);
 
+    const [sourceCoordinates, setSourceCoordinates] = useState<[number, number] | null>(null);
+    const [destinationCoordinates, setDestinationCoordinates] = useState<[number, number] | null>(null);
+    
     const [minTime, setMinTime] = useState<string>("12:00");
     const [maxTime, setMaxTime] = useState<string>("12:00");
 
@@ -34,7 +37,7 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingForm
       return false;
     };
     const validateInput = () => {
-      return source != null && destination != null && time1LessThanTime2(minTime, maxTime);
+      return sourceAddress != null && destinationAddress != null && time1LessThanTime2(minTime, maxTime);
     };
 
     return (
@@ -42,7 +45,7 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingForm
         onSubmit={async (e) => {
           e.preventDefault();
           if (validateInput()) {
-            await onSubmit(source!, destination!, minTime, maxTime);
+            await onSubmit(sourceAddress!, destinationAddress!, minTime, maxTime);
           }
         }}
 
@@ -52,14 +55,17 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingForm
         <div data-testid="source-wrapper" >
           <MapSearch
             placeholderText="Source Address"
-            onSelectLocation={setSource}
+            setAddress={setSourceAddress}
+            setCoordinates={setSourceCoordinates}
+            
           />
         </div>
 
         <div data-testid="destination-wrapper">
           <MapSearch
             placeholderText="Destination Address"
-            onSelectLocation={setDestination}
+            setAddress={setDestinationAddress}
+            setCoordinates={setDestinationCoordinates}
           />
         </div>
 
@@ -86,7 +92,7 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingForm
         </div>
         {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
         {isLoading && <p>Loading result...</p>}
-        <MapDisplay sourceLocation={source}/>
+        <MapDisplay sourceLocation={sourceCoordinates}/>
       </form>
     );
     

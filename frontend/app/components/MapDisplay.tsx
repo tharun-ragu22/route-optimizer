@@ -6,7 +6,7 @@ import { TomTomConfig } from '@tomtom-org/maps-sdk/core';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface MapDisplayProps {
-  sourceLocation?: string | null;
+  sourceLocation?: [number, number] | null;
 }
 
 export default function MapDisplay({ sourceLocation }: MapDisplayProps) {
