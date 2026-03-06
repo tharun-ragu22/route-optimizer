@@ -16,32 +16,27 @@ jest.mock('use-places-autocomplete', () => {
 
 import usePlacesAutocomplete from 'use-places-autocomplete';
 
+// Mock the MapDisplay component globally for this test
 jest.mock('../app/components/MapDisplay', () => {
-    return function MockMap() {
-        return <div data-testid="tomtom-map" />;
-    };
+  return function MockMapDisplay(props) {
+    return (
+      <div data-testid="mock-map-container">
+        {/* We "stringify" the coordinates so we can find them in the DOM */}
+        <span data-testid="map-coords">
+          {props.sourceLocation ? JSON.stringify(props.sourceLocation) : 'no-point'}
+        </span>
+      </div>
+    );
+};
 });
+
 import RoutingForm from '@/app/components/RoutingForm';
 
-// // Mock the TomTom library
-// At the top of mapdisplay.test.js
-jest.mock('@tomtom-org/maps-sdk/map', () => {
-    const mMarker = {
-        setLngLat: jest.fn().mockReturnThis(),
-        addTo: jest.fn().mockReturnThis(),
-        remove: jest.fn().mockReturnThis(),
-    };
 
-    return {
-        TomTomMap: jest.fn().mockImplementation(() => ({
-            on: jest.fn(),
-            remove: jest.fn(),
-            addControl: jest.fn(),
-        })),
-        TomTomMarker: jest.fn(() => mMarker), // Add this!
-    };
-});
-
+jest.mock('../app/components/geocoder', () => ({
+  __esModule: true,
+  addressToCoordinates: jest.fn().mockResolvedValue([-79.2308, 43.8375])
+}));
 
 
 describe('RoutingForm Component', () => {
@@ -219,9 +214,8 @@ describe('RoutingForm Component', () => {
     it('adds source point to map when populated in form', async () => {
         // Given the user has put a source address
         const user = userEvent.setup();
+        // const geocodeSpy = jest.spyOn(geocoder, 'addressToCoordinates').mockResolvedValue([-79.2308, 43.8375]);
         render(<RoutingForm />)
-
-        const mapContainer = screen.getByTestId('tomtom-map');
     
         const sourceContainer= await screen.getByTestId('source-wrapper')
         const sourceInput = await screen.findByPlaceholderText("Source Address");
@@ -233,16 +227,14 @@ describe('RoutingForm Component', () => {
         await user.click(suggestion);
         // Then the point should show on the map
 
-        const { TomTomMarker } = require('@tomtom-org/maps-sdk/map');
-    
+        // 3. ASSERTION: Check if the "Mock Map" received the correct data
         await waitFor(() => {
-            expect(TomTomMarker).toHaveBeenCalled();
+            const coordDisplay = screen.getByTestId('map-coords');
+            expect(coordDisplay.textContent).toContain('-79.2308');
+            expect(coordDisplay.textContent).toContain('43.8375');
         });
 
-        // 5. OPTIONAL: Check if it was placed at the right coordinates
-        const markerInstance = TomTomMarker.mock.results[0].value;
-        // Assuming your mock data returns these coordinates for 300 Kingston Rd
-        expect(markerInstance.setLngLat).toHaveBeenCalled();
+        // geocodeSpy.mockRestore()
 
     })
 });
