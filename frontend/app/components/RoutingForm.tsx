@@ -1,10 +1,24 @@
 'use client'
 import { useState } from "react";
 import MapSearch from "./MapSearch";
+import MapDisplay from "./MapDisplay";
 
 export const sample = () => {console.log('submitted form')};
 
-export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit: (src: string, dst: string, time_leave_min: string, time_leave_max: string) => void, isLoading: boolean }) {
+interface RoutingFormProps {
+  /** Callback function triggered when the form is submitted */
+  onSubmit: (
+    src: string, 
+    dst: string, 
+    time_leave_min: string, 
+    time_leave_max: string
+  ) => void;
+  
+  /** Boolean state to indicate if a routing request is currently in progress */
+  isLoading: boolean;
+}
+
+export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingFormProps) {
     const [source, setSource] = useState<string | null>(null);
     const [destination, setDestination] = useState<string | null>(null);
 
@@ -72,6 +86,7 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit:
         </div>
         {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
         {isLoading && <p>Loading result...</p>}
+        <MapDisplay sourceLocation={source}/>
       </form>
     );
     
