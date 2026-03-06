@@ -17,10 +17,6 @@ const config: Config = {
   collectCoverage: true,
   coverageProvider: 'v8',
   coverageDirectory: 'coverage',
-  transformIgnorePatterns: [
-    // This tells Jest: "Ignore all node_modules EXCEPT those starting with @tomtom-org"
-    '/node_modules/(?!(@tomtom-org)/)',
-  ],
 
   // If you create a jest.setup.ts file for custom matchers, link it here:
   // setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
