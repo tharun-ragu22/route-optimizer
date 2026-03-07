@@ -19,7 +19,9 @@ test('short trip', async ({page}) => {
   await leaveTimeMax.pressSequentially('1100AM')
 
   // When the user hits submit
-  await page.getByText(/submit/i).click({ force: true })
+  const submitButton = await page.getByText(/submit/i)
+  await submitButton.scrollIntoViewIfNeeded();
+  await submitButton.click({ force: true })
   
   // Then the user will get an answer, when to leave and how long it will take  
   await expect(page.getByText(/Time to leave: \d+/i)).toBeVisible({timeout: 150000})
