@@ -92,7 +92,7 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingForm
         </div>
         {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
         {isLoading && <p>Loading result...</p>}
-        <MapDisplay sourceLocation={sourceCoordinates}/>
+        <MapDisplay sourceLocation={sourceCoordinates} destinationLocation={destinationCoordinates}/>
       </form>
     );
     

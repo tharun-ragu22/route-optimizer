@@ -21,10 +21,13 @@ jest.mock('../app/components/MapDisplay', () => {
   return function MockMapDisplay(props) {
     return (
       <div data-testid="mock-map-container">
-        {/* We "stringify" the coordinates so we can find them in the DOM */}
-        <span data-testid="map-coords">
-          {props.sourceLocation ? JSON.stringify(props.sourceLocation) : 'no-point'}
-        </span>
+        <div data-testid="map-coords">
+          <p data-testid="source-lat">{props.sourceLocation ? props.sourceLocation[0] : 'empty'}, </p>
+          <p data-testid="source-lng">{props.sourceLocation ? props.sourceLocation[1] : 'empty'}</p>
+
+          <p data-testid="destination-lat">{props.destinationLocation ? props.destinationLocation[0] : 'empty'}, </p>
+          <p data-testid="destination-lng">{props.destinationLocation ? props.destinationLocation[1] : 'empty'}</p>
+        </div>
       </div>
     );
 };
@@ -35,7 +38,13 @@ import RoutingForm from '@/app/components/RoutingForm';
 
 jest.mock('../app/components/geocoder', () => ({
   __esModule: true,
-  addressToCoordinates: jest.fn().mockResolvedValue([-79.2308, 43.8375])
+  addressToCoordinates: jest.fn((address) => {
+    // Map specific addresses to specific coordinates
+    const ret = address.includes("300") ? [-79.2308, 43.8375] : [-79.1234, 43.1234]
+
+    // Return the coordinate if found, otherwise a default
+    return Promise.resolve(ret);
+  })
 }));
 
 
@@ -214,7 +223,6 @@ describe('RoutingForm Component', () => {
     it('adds source point to map when populated in form', async () => {
         // Given the user has put a source address
         const user = userEvent.setup();
-        // const geocodeSpy = jest.spyOn(geocoder, 'addressToCoordinates').mockResolvedValue([-79.2308, 43.8375]);
         render(<RoutingForm />)
     
         const sourceContainer= await screen.getByTestId('source-wrapper')
@@ -226,15 +234,47 @@ describe('RoutingForm Component', () => {
         const suggestion = await within(sourceContainer).findByText(/300/i);
         await user.click(suggestion);
         // Then the point should show on the map
-
-        // 3. ASSERTION: Check if the "Mock Map" received the correct data
         await waitFor(() => {
             const coordDisplay = screen.getByTestId('map-coords');
             expect(coordDisplay.textContent).toContain('-79.2308');
             expect(coordDisplay.textContent).toContain('43.8375');
         });
-
-        // geocodeSpy.mockRestore()
-
     })
+
+    it('adds destination point to map when populated in form', async () => {
+        // Given the user has put a source address
+        const user = userEvent.setup();
+        render(<RoutingForm />)
+    
+        const sourceContainer= await screen.getByTestId('source-wrapper')
+        const sourceInput = await screen.findByPlaceholderText("Source Address");
+                
+        await user.type(sourceInput, '300 Kingston Rd');
+        
+        const suggestion = await within(sourceContainer).findByText(/300/i);
+        await user.click(suggestion);
+        // When they enter destination
+
+        const destinationContainer= await screen.getByTestId('destination-wrapper')
+        const destinationInput = await screen.findByPlaceholderText("Destination Address");
+        
+        
+        await user.type(destinationInput, '750 Kingston Rd');
+        const destinationSuggestion = await within(destinationContainer).findByText(/750/i);
+        await user.click(destinationSuggestion);
+
+        // Then both points should show on the map
+
+        await waitFor(() => {
+            const coordDisplay = screen.getByTestId('map-coords');
+            expect(coordDisplay.textContent).toContain('-79.2308');
+            expect(coordDisplay.textContent).toContain('43.8375');
+
+            expect(coordDisplay.textContent).toContain('-79.1234');
+            expect(coordDisplay.textContent).toContain('43.1234');
+        });
+    })
+
+
+    
 });
