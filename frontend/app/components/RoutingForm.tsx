@@ -26,33 +26,37 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
     const [sourceCoordinates, setSourceCoordinates] = useState<[number, number] | null>(null);
     const [destinationCoordinates, setDestinationCoordinates] = useState<[number, number] | null>(null);
 
-    const [hasSubmittedOnce, setHasSubmittedOnce] = useState(false);
+    const [submitCounter, setSubmitCounter] = useState(0);
     const [bestTime, setBestTime] = useState("");
     const [expectedDuration, setExpectedDuration] = useState("");
-    
+
     const [minTime, setMinTime] = useState<string>("12:00");
     const [maxTime, setMaxTime] = useState<string>("12:00");
-    
 
-    const handleSubmit = async (src: string, dst: string, time_leave_min: string, time_leave_max: string) => {
+    const handleSubmit = async (
+      src: string,
+      dst: string,
+      time_leave_min: string,
+      time_leave_max: string,
+    ) => {
       console.log("form submitted");
       setIsLoading(true);
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      
+
       try {
         const response = await fetch(
-          `${baseUrl}/get_best_time?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`, {
-          method: "GET",
-          
-        });
+          `${baseUrl}/get_best_time?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`,
+          {
+            method: "GET",
+          },
+        );
         const data = await response.json();
-        console.log(data)
+        console.log(data);
 
         setBestTime(data.best_time);
         setExpectedDuration(data.expected_duration);
-        
       } finally {
-        setHasSubmittedOnce(true);
+        setSubmitCounter(submitCounter + 1);
         setIsLoading(false);
       }
     };
@@ -68,7 +72,11 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
       return false;
     };
     const validateInput = () => {
-      return sourceAddress != null && destinationAddress != null && time1LessThanTime2(minTime, maxTime);
+      return (
+        sourceAddress != null &&
+        destinationAddress != null &&
+        time1LessThanTime2(minTime, maxTime)
+      );
     };
 
     return (
@@ -76,19 +84,21 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
         onSubmit={async (e) => {
           e.preventDefault();
           if (validateInput()) {
-            await onSubmit(sourceAddress!, destinationAddress!, minTime, maxTime);
+            await onSubmit(
+              sourceAddress!,
+              destinationAddress!,
+              minTime,
+              maxTime,
+            );
           }
         }}
-
         className="space-y-3"
-        
       >
-        <div data-testid="source-wrapper" >
+        <div data-testid="source-wrapper">
           <MapSearch
             placeholderText="Source Address"
             setAddress={setSourceAddress}
             setCoordinates={setSourceCoordinates}
-            
           />
         </div>
 
@@ -121,12 +131,20 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
             onChange={(e) => setMaxTime(e.target.value)}
           />
         </div>
-        {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
+        {!isLoading && (
+          <input type="submit" value="Submit" className="snazzy-submit" />
+        )}
         {isLoading && <p>Loading result...</p>}
 
-        {hasSubmittedOnce && !isLoading && <p>Time to leave: {bestTime}</p>}
-        {hasSubmittedOnce && !isLoading && <p>Expected duration: {expectedDuration} minutes</p>}
-        <MapDisplay sourceLocation={sourceCoordinates} destinationLocation={destinationCoordinates}/>
+        {submitCounter > 0 && !isLoading && <p>Time to leave: {bestTime}</p>}
+        {submitCounter > 0 && !isLoading && (
+          <p>Expected duration: {expectedDuration} minutes</p>
+        )}
+        <MapDisplay
+          sourceLocation={sourceCoordinates}
+          destinationLocation={destinationCoordinates}
+          submitCounter={submitCounter}
+        />
       </form>
     );
     
