@@ -13,6 +13,11 @@ jest.mock('use-places-autocomplete', () => {
   };
 });
 
+jest.mock('../app/components/geocoder', () => ({
+  __esModule: true,
+  addressToCoordinates: jest.fn().mockResolvedValue([-79.2308, 43.8375])
+}));
+
 import usePlacesAutocomplete from 'use-places-autocomplete';
 
 describe('MapSearch Component', () => {
@@ -41,7 +46,7 @@ describe('MapSearch Component', () => {
     const user = userEvent.setup();
 
     const placeholderText = "Search for a location..."
-    render(<MapSearch placeholderText={placeholderText} onSelectLocation={jest.fn}/>);
+    render(<MapSearch placeholderText={placeholderText} setAddress={jest.fn} setCoordinates={jest.fn}/>);
 
     const input = await screen.findByPlaceholderText(placeholderText);
     

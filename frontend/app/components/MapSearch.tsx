@@ -1,8 +1,16 @@
 'use client';
 
 import usePlacesAutocomplete from 'use-places-autocomplete';
+import { addressToCoordinates } from './geocoder';
 
-export default function MapSearch({ placeholderText, onSelectLocation }: { placeholderText: string, onSelectLocation: (address: string | null) => void }) {
+interface MapSearchProps{ 
+  placeholderText: string
+  setAddress: (address: string | null) => void 
+  setCoordinates:  (coordinates: [number, number] | null) => void
+}
+
+
+export default function MapSearch({ placeholderText, setAddress, setCoordinates }: MapSearchProps) {
   const {
     ready,
     value,
@@ -16,7 +24,9 @@ export default function MapSearch({ placeholderText, onSelectLocation }: { place
   const handleSelect = async (address: string) => {
     setValue(address, false);
     clearSuggestions();
-    onSelectLocation(address)
+    setAddress(address)
+    setCoordinates(await addressToCoordinates(address));
+    
   };
 
   return (

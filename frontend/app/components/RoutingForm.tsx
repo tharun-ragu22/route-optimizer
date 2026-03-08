@@ -1,15 +1,67 @@
 'use client'
 import { useState } from "react";
 import MapSearch from "./MapSearch";
+import MapDisplay from "./MapDisplay";
 
 export const sample = () => {console.log('submitted form')};
 
-export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit: (src: string, dst: string, time_leave_min: string, time_leave_max: string) => void, isLoading: boolean }) {
-    const [source, setSource] = useState<string | null>(null);
-    const [destination, setDestination] = useState<string | null>(null);
+interface RoutingFormProps {
+  /** Callback function triggered when the form is submitted */
+  onSubmit?: (
+    src: string, 
+    dst: string, 
+    time_leave_min: string, 
+    time_leave_max: string
+  ) => Promise<void> | null;
+  
+  /** Boolean state to indicate if a routing request is currently in progress */
+  isLoading: boolean;
+  setIsLoading: (load_val: boolean) => void;
+}
+
+export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: RoutingFormProps) {
+    const [sourceAddress, setSourceAddress] = useState<string | null>(null);
+    const [destinationAddress, setDestinationAddress] = useState<string | null>(null);
+
+    const [sourceCoordinates, setSourceCoordinates] = useState<[number, number] | null>(null);
+    const [destinationCoordinates, setDestinationCoordinates] = useState<[number, number] | null>(null);
+
+    const [submitCounter, setSubmitCounter] = useState(0);
+    const [bestTime, setBestTime] = useState("");
+    const [expectedDuration, setExpectedDuration] = useState("");
 
     const [minTime, setMinTime] = useState<string>("12:00");
     const [maxTime, setMaxTime] = useState<string>("12:00");
+
+    const handleSubmit = async (
+      src: string,
+      dst: string,
+      time_leave_min: string,
+      time_leave_max: string,
+    ) => {
+      console.log("form submitted");
+      setIsLoading(true);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      try {
+        const response = await fetch(
+          `${baseUrl}/get_best_time?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`,
+          {
+            method: "GET",
+          },
+        );
+        const data = await response.json();
+        console.log(data);
+
+        setBestTime(data.best_time);
+        setExpectedDuration(data.expected_duration);
+      } finally {
+        setSubmitCounter(submitCounter + 1);
+        setIsLoading(false);
+      }
+    };
+
+    onSubmit = onSubmit ?? handleSubmit;
 
     const time1LessThanTime2 = (time1: string, time2: string) => {
       const [h1, m1] = time1.split(":").map((x) => parseInt(x));
@@ -20,7 +72,11 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit:
       return false;
     };
     const validateInput = () => {
-      return source != null && destination != null && time1LessThanTime2(minTime, maxTime);
+      return (
+        sourceAddress != null &&
+        destinationAddress != null &&
+        time1LessThanTime2(minTime, maxTime)
+      );
     };
 
     return (
@@ -28,24 +84,29 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit:
         onSubmit={async (e) => {
           e.preventDefault();
           if (validateInput()) {
-            await onSubmit(source!, destination!, minTime, maxTime);
+            await onSubmit(
+              sourceAddress!,
+              destinationAddress!,
+              minTime,
+              maxTime,
+            );
           }
         }}
-
         className="space-y-3"
-        
       >
-        <div data-testid="source-wrapper" >
+        <div data-testid="source-wrapper">
           <MapSearch
             placeholderText="Source Address"
-            onSelectLocation={setSource}
+            setAddress={setSourceAddress}
+            setCoordinates={setSourceCoordinates}
           />
         </div>
 
         <div data-testid="destination-wrapper">
           <MapSearch
             placeholderText="Destination Address"
-            onSelectLocation={setDestination}
+            setAddress={setDestinationAddress}
+            setCoordinates={setDestinationCoordinates}
           />
         </div>
 
@@ -70,8 +131,20 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: { onSubmit:
             onChange={(e) => setMaxTime(e.target.value)}
           />
         </div>
-        {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
+        {!isLoading && (
+          <input type="submit" value="Submit" className="snazzy-submit" />
+        )}
         {isLoading && <p>Loading result...</p>}
+
+        {submitCounter > 0 && !isLoading && <p>Time to leave: {bestTime}</p>}
+        {submitCounter > 0 && !isLoading && (
+          <p>Expected duration: {expectedDuration} minutes</p>
+        )}
+        <MapDisplay
+          sourceLocation={sourceCoordinates}
+          destinationLocation={destinationCoordinates}
+          submitCounter={submitCounter}
+        />
       </form>
     );
     
