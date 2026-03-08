@@ -7,26 +7,57 @@ export const sample = () => {console.log('submitted form')};
 
 interface RoutingFormProps {
   /** Callback function triggered when the form is submitted */
-  onSubmit: (
+  onSubmit?: (
     src: string, 
     dst: string, 
     time_leave_min: string, 
     time_leave_max: string
-  ) => void;
+  ) => Promise<void> | null;
   
   /** Boolean state to indicate if a routing request is currently in progress */
   isLoading: boolean;
+  setIsLoading: (load_val: boolean) => void;
 }
 
-export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingFormProps) {
+export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: RoutingFormProps) {
     const [sourceAddress, setSourceAddress] = useState<string | null>(null);
     const [destinationAddress, setDestinationAddress] = useState<string | null>(null);
 
     const [sourceCoordinates, setSourceCoordinates] = useState<[number, number] | null>(null);
     const [destinationCoordinates, setDestinationCoordinates] = useState<[number, number] | null>(null);
+
+    const [hasSubmittedOnce, setHasSubmittedOnce] = useState(false);
+    const [bestTime, setBestTime] = useState("");
+    const [expectedDuration, setExpectedDuration] = useState("");
     
     const [minTime, setMinTime] = useState<string>("12:00");
     const [maxTime, setMaxTime] = useState<string>("12:00");
+    
+
+    const handleSubmit = async (src: string, dst: string, time_leave_min: string, time_leave_max: string) => {
+      console.log("form submitted");
+      setIsLoading(true);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      
+      try {
+        const response = await fetch(
+          `${baseUrl}/get_best_time?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`, {
+          method: "GET",
+          
+        });
+        const data = await response.json();
+        console.log(data)
+
+        setBestTime(data.best_time);
+        setExpectedDuration(data.expected_duration);
+        
+      } finally {
+        setHasSubmittedOnce(true);
+        setIsLoading(false);
+      }
+    };
+
+    onSubmit = onSubmit ?? handleSubmit;
 
     const time1LessThanTime2 = (time1: string, time2: string) => {
       const [h1, m1] = time1.split(":").map((x) => parseInt(x));
@@ -92,6 +123,9 @@ export default function RoutingForm({ onSubmit = sample, isLoading}: RoutingForm
         </div>
         {!isLoading && <input type="submit" value="Submit" className="snazzy-submit"/>}
         {isLoading && <p>Loading result...</p>}
+
+        {hasSubmittedOnce && !isLoading && <p>Time to leave: {bestTime}</p>}
+        {hasSubmittedOnce && !isLoading && <p>Expected duration: {expectedDuration} minutes</p>}
         <MapDisplay sourceLocation={sourceCoordinates} destinationLocation={destinationCoordinates}/>
       </form>
     );

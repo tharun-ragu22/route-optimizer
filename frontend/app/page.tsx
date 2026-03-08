@@ -6,31 +6,9 @@ import { useState } from "react";
 export default function Home() {
   const libraries: ("places")[] = ["places"];
   const [isLoading, setIsLoading] = useState(false)
-  const [hasSubmittedOnce, setHasSubmittedOnce] = useState(false);
-  const [bestTime, setBestTime] = useState("");
-  const [expectedDuration, setExpectedDuration] = useState("");
-  const handleSubmit = async (src: string, dst: string, time_leave_min: string, time_leave_max: string) => {
-    console.log("form submitted");
-    setIsLoading(true);
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-    
-    try {
-      const response = await fetch(
-        `${baseUrl}/get_best_time?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`, {
-        method: "GET",
-        
-      });
-      const data = await response.json();
-      console.log(data)
-
-      setBestTime(data.best_time);
-      setExpectedDuration(data.expected_duration);
-      
-    } finally {
-      setHasSubmittedOnce(true);
-      setIsLoading(false);
-    }
-  };
+  
+  
+  
   // console.log(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY)
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -44,10 +22,8 @@ export default function Home() {
           googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ""}
           libraries={libraries}
           >
-            <RoutingForm onSubmit={handleSubmit} isLoading={isLoading}/>
+            <RoutingForm isLoading={isLoading} setIsLoading={setIsLoading}/>
           </LoadScript>
-          {hasSubmittedOnce && !isLoading && <p>Time to leave: {bestTime}</p>}
-          {hasSubmittedOnce && !isLoading && <p>Expected duration: {expectedDuration} minutes</p>}
         </div>
       </main>
     </div>
