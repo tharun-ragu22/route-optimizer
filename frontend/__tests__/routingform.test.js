@@ -27,6 +27,8 @@ jest.mock('../app/components/MapDisplay', () => {
 
           <p data-testid="destination-lat">{props.destinationLocation ? props.destinationLocation[0] : 'empty'}, </p>
           <p data-testid="destination-lng">{props.destinationLocation ? props.destinationLocation[1] : 'empty'}</p>
+
+          {props.route ? 'discovered-route' : 'no-route'}
         </div>
       </div>
     );
@@ -46,6 +48,48 @@ jest.mock('../app/components/geocoder', () => ({
     return Promise.resolve(ret);
   })
 }));
+
+jest.mock('../app/components/routefinder', () => ({
+  __esModule: true,
+  // Ensure it returns a Promise to satisfy the 'await' in your useEffect
+  default: jest.fn(() => Promise.resolve({
+    type: 'FeatureCollection',
+    features: []
+  }))
+}));
+
+import getRoute from '../app/components/routefinder'
+
+const TestRoutingFormWrapper = () => {
+    const [loading, setLoading] = useState(false);
+    
+    const handleInternalSubmit = async () => {
+        setLoading(true);
+        // Simulate the API delay
+        await new Promise((resolve) => {
+            // We attach the resolver to the window so the test can trigger it
+            window.resolveSubmit = resolve;
+        });
+        setLoading(false)
+    };
+
+    return <RoutingForm onSubmit={handleInternalSubmit} isLoading={loading} setIsLoading={setLoading}  />;
+};
+
+const TestRoutingFormWrapperNoFakeSubmit = () => {
+    const [loading, setLoading] = useState(false);
+
+    const handleInternalSubmit = async () => {
+        setLoading(true);
+        // Simulate the API delay
+        await getRoute([0,0],[0,0])
+        setLoading(false)
+    };
+    
+    
+
+    return <RoutingForm onSubmit={handleInternalSubmit} isLoading={loading} setIsLoading={setLoading}  />;
+};
 
 
 describe('RoutingForm Component', () => {
@@ -161,21 +205,7 @@ describe('RoutingForm Component', () => {
         
 
         
-        const TestRoutingFormWrapper = () => {
-            const [loading, setLoading] = useState(false);
-            
-            const handleInternalSubmit = async () => {
-                setLoading(true);
-                // Simulate the API delay
-                await new Promise((resolve) => {
-                    // We attach the resolver to the window so the test can trigger it
-                    window.resolveSubmit = resolve;
-                });
-                setLoading(false)
-            };
-
-            return <RoutingForm onSubmit={handleInternalSubmit} isLoading={loading} />;
-        };
+        
 
         render(<TestRoutingFormWrapper />);
         const sourceContainer= await screen.getByTestId('source-wrapper')
@@ -273,6 +303,50 @@ describe('RoutingForm Component', () => {
             expect(coordDisplay.textContent).toContain('-79.1234');
             expect(coordDisplay.textContent).toContain('43.1234');
         });
+    })
+
+    it('adds route to map when form is submitted', async () => {
+        // Given the user has filled out source and destination
+        const user = userEvent.setup();
+        // const mockSubmit = jest.fn();
+        render(<TestRoutingFormWrapperNoFakeSubmit />);
+        const sourceContainer= await screen.getByTestId('source-wrapper')
+        const sourceInput = await screen.findByPlaceholderText("Source Address");
+        
+        await user.type(sourceInput, '300 Kingston Rd');
+        const suggestion = await within(sourceContainer).findByText(/300/i);
+        await user.click(suggestion);
+
+        const destinationContainer= await screen.getByTestId('destination-wrapper')
+        const destinationInput = await screen.findByPlaceholderText("Destination Address");
+        
+        
+        await user.type(destinationInput, '750 Kingston Rd');
+        const destinationSuggestion = await within(destinationContainer).findByText(/750/i);
+        await user.click(destinationSuggestion);
+
+        // And source to destination is driveable
+        // And user selects time range
+
+        const leaveTimeMin = await screen.getByTestId('leave-time-min')
+        await user.clear(leaveTimeMin);
+        await user.type(leaveTimeMin, '17:00')
+
+        const leaveTimeMax = await screen.getByTestId('leave-time-max')
+        await user.clear(leaveTimeMax);
+        await user.type(leaveTimeMax, '17:30')
+
+        // and time range is correct
+        // When user hits submit
+
+        const button = screen.getByRole('button', { name: "Submit" });
+        await user.click(button);
+        // Then they see the route from the source to destination on the map
+        // Wrap the expectation in waitFor
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+        expect(getRoute).toHaveBeenCalled();
     })
 
 
