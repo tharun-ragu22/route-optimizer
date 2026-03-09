@@ -11,7 +11,8 @@ load_dotenv()
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://route-optimize.netlify.app"
 ]
 
 print(origins)
@@ -39,4 +40,5 @@ def get_best_time_endpoint(
     return {'best_time': res.best_time, 'expected_duration': res.duration}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)

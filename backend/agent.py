@@ -9,7 +9,7 @@ from duration_getter import get_duration_from_external_api
 import time
 from constants import RATE_LIMIT_ERROR, NO_ROUTE_FOUND_ERROR
 
-load_dotenv()
+load_dotenv(override=False)
 
 class AgentResponse(BaseModel):
     """Best time to leave, and how long the trip will take"""
