@@ -35,7 +35,7 @@ jest.mock('../app/components/MapDisplay', () => {
 };
 });
 
-import RoutingForm, {TimeErrorMessage, SourceAddressNullErrorMessage} from '@/app/components/RoutingForm';
+import RoutingForm, {TimeErrorMessage, SourceAddressNullErrorMessage, DestinationAddressNullErrorMessage} from '@/app/components/RoutingForm';
 
 
 jest.mock('../app/components/geocoder', () => ({
@@ -203,7 +203,7 @@ describe('RoutingForm Component', () => {
     });
 
     it('does not submit when source address has not been populated', async () => {
-        // Given the user has filled out source and destination
+        // Given the user has filled out form except for source
         const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
         
         const user = userEvent.setup();
@@ -219,9 +219,6 @@ describe('RoutingForm Component', () => {
         const destinationSuggestion = await within(destinationContainer).findByText(/750/i);
         await user.click(destinationSuggestion);
 
-        // And source to destination is driveable
-        // And user selects time range
-
         const leaveTimeMin = await screen.getByTestId('leave-time-min')
         await user.clear(leaveTimeMin);
         await user.type(leaveTimeMin, '17:30')
@@ -230,7 +227,6 @@ describe('RoutingForm Component', () => {
         await user.clear(leaveTimeMax);
         await user.type(leaveTimeMax, '17:00')
 
-        // and time range is correct
         // When user hits submit
 
         const button = screen.getByRole('button', { name: "Submit" });
@@ -238,6 +234,42 @@ describe('RoutingForm Component', () => {
         // Then they get an alert
         expect(alertSpy).toHaveBeenCalledTimes(1);
         expect(alertSpy).toHaveBeenCalledWith(SourceAddressNullErrorMessage);
+        // And the form is not submitted
+        expect(mockSubmit).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not submit when destination address has not been populated', async () => {
+        // Given the user has filled out form except for destination
+        const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+        
+        const user = userEvent.setup();
+        const mockSubmit = jest.fn();
+        render(<RoutingForm onSubmit={mockSubmit}/>);
+        
+
+        const sourceContainer= await screen.getByTestId('source-wrapper')
+        const sourceInput = await screen.findByPlaceholderText("Source Address");
+        
+        
+        await user.type(sourceInput, '300 Kingston Rd');
+        const sourceSuggestion = await within(sourceContainer).findByText(/300/i);
+        await user.click(sourceSuggestion);
+
+        const leaveTimeMin = await screen.getByTestId('leave-time-min')
+        await user.clear(leaveTimeMin);
+        await user.type(leaveTimeMin, '17:00')
+
+        const leaveTimeMax = await screen.getByTestId('leave-time-max')
+        await user.clear(leaveTimeMax);
+        await user.type(leaveTimeMax, '17:30')
+
+        // When user hits submit
+
+        const button = screen.getByRole('button', { name: "Submit" });
+        await user.click(button);
+        // Then they get an alert
+        expect(alertSpy).toHaveBeenCalledTimes(1);
+        expect(alertSpy).toHaveBeenCalledWith(DestinationAddressNullErrorMessage);
         // And the form is not submitted
         expect(mockSubmit).toHaveBeenCalledTimes(0);
     });
