@@ -4,6 +4,8 @@ import MapSearch from "./MapSearch";
 import MapDisplay from "./MapDisplay";
 
 export const sample = () => {console.log('submitted form')};
+export const TimeErrorMessage = "Make sure the min time is before the max time!";
+export const SourceAddressNullErrorMessage = "Enter a source address!";
 
 interface RoutingFormProps {
   /** Callback function triggered when the form is submitted */
@@ -71,9 +73,13 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
       if (h1 == h2 && m1 < m2) return true;
       return false;
     };
+  
     const validateInput = () => {
-      if (!time1LessThanTime2(minTime, maxTime)){
-        return "Make sure the min time is before the max time!"
+      if (sourceAddress === null){
+        return SourceAddressNullErrorMessage
+      }
+      else if (!time1LessThanTime2(minTime, maxTime)){
+        return TimeErrorMessage
       }
       return (
         sourceAddress != null &&
@@ -91,6 +97,9 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
             e.preventDefault();
             const validateResult = validateInput();
             if (validateResult == "Make sure the min time is before the max time!"){
+              alert(validateResult)
+            }
+            else if (validateResult == SourceAddressNullErrorMessage){
               alert(validateResult)
             }
             else {
