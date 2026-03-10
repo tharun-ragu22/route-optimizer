@@ -85,11 +85,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
       else if (!time1LessThanTime2(minTime, maxTime)){
         return TimeErrorMessage
       }
-      return (
-        sourceAddress != null &&
-        destinationAddress != null &&
-        time1LessThanTime2(minTime, maxTime)
-      );
+      return "";
     };
 
     return (
@@ -100,13 +96,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
           onSubmit={async (e) => {
             e.preventDefault();
             const validateResult = validateInput();
-            if (validateResult == TimeErrorMessage){
-              alert(validateResult)
-            }
-            else if (validateResult == SourceAddressNullErrorMessage){
-              alert(validateResult)
-            }
-            else if (validateResult == DestinationAddressNullErrorMessage){
+            if (validateResult != ""){
               alert(validateResult)
             }
             else {
