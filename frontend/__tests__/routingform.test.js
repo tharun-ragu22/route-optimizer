@@ -159,6 +159,8 @@ describe('RoutingForm Component', () => {
 
     it('does not submit when time range is not correct', async () => {
         // Given the user has filled out source and destination
+        const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+        
         const user = userEvent.setup();
         const mockSubmit = jest.fn();
         render(<RoutingForm onSubmit={mockSubmit}/>);
@@ -193,11 +195,12 @@ describe('RoutingForm Component', () => {
 
         const button = screen.getByRole('button', { name: "Submit" });
         await user.click(button);
-        // Then they get the minimum time
-        
-        // Assert that the mock was called once
+        // Then they get an alert
+        expect(alertSpy).toHaveBeenCalledTimes(1);
+        // And the form is not submitted
         expect(mockSubmit).toHaveBeenCalledTimes(0);
     });
+    
     it('hides submit when form is loading', async () => {
         // Given user has filled form correctly
         

@@ -72,6 +72,9 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
       return false;
     };
     const validateInput = () => {
+      if (!time1LessThanTime2(minTime, maxTime)){
+        return "Make sure the min time is before the max time!"
+      }
       return (
         sourceAddress != null &&
         destinationAddress != null &&
@@ -86,7 +89,11 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
           <form
           onSubmit={async (e) => {
             e.preventDefault();
-            if (validateInput()) {
+            const validateResult = validateInput();
+            if (validateResult == "Make sure the min time is before the max time!"){
+              alert(validateResult)
+            }
+            else {
               await onSubmit(
                 sourceAddress!,
                 destinationAddress!,
