@@ -80,72 +80,83 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
     };
 
     return (
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (validateInput()) {
-            await onSubmit(
-              sourceAddress!,
-              destinationAddress!,
-              minTime,
-              maxTime,
-            );
-          }
-        }}
-        className="space-y-3"
-      >
-        <div data-testid="source-wrapper">
-          <MapSearch
-            placeholderText="Source Address"
-            setAddress={setSourceAddress}
-            setCoordinates={setSourceCoordinates}
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-15">
+        <div className="p-6 dark:bg-zinc-800">
+          <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (validateInput()) {
+              await onSubmit(
+                sourceAddress!,
+                destinationAddress!,
+                minTime,
+                maxTime,
+              );
+            }
+          }}
+          className="space-y-3"
+        >
+          <div data-testid="source-wrapper">
+            <MapSearch
+              placeholderText="Source Address"
+              setAddress={setSourceAddress}
+              setCoordinates={setSourceCoordinates}
+            />
+          </div>
+
+          <div data-testid="destination-wrapper">
+            <MapSearch
+              placeholderText="Destination Address"
+              setAddress={setDestinationAddress}
+              setCoordinates={setDestinationCoordinates}
+            />
+          </div>
+
+          <div data-testid="leave-time-min-wrapper">
+            <p>Leave Time Min</p>
+            <input
+              data-testid="leave-time-min"
+              type="time"
+              className="p-2 border rounded text-black"
+              defaultValue="12:00"
+              onChange={(e) => setMinTime(e.target.value)}
+            />
+          </div>
+
+          <div data-testid="leave-time-max-wrapper">
+            <p>Leave Time Max</p>
+            <input
+              data-testid="leave-time-max"
+              type="time"
+              className="p-2 border rounded text-black"
+              defaultValue="12:00"
+              onChange={(e) => setMaxTime(e.target.value)}
+            />
+          </div>
+          {!isLoading && (
+            <input type="submit" value="Submit" className="snazzy-submit" />
+          )}
+          {isLoading && <p>Loading result...</p>}
+
+          {submitCounter > 0 && !isLoading && <p>Time to leave: {bestTime}</p>}
+          {submitCounter > 0 && !isLoading && (
+            <p>Expected duration: {expectedDuration} minutes</p>
+          )}
+          
+        </form>
+        </div>
+        <div className="md:col-span-2 dark:bg-zinc-800">
+          <MapDisplay
+            sourceLocation={sourceCoordinates}
+            destinationLocation={destinationCoordinates}
+            submitCounter={submitCounter}
           />
         </div>
-
-        <div data-testid="destination-wrapper">
-          <MapSearch
-            placeholderText="Destination Address"
-            setAddress={setDestinationAddress}
-            setCoordinates={setDestinationCoordinates}
-          />
-        </div>
-
-        <div data-testid="leave-time-min-wrapper">
-          <p>Leave Time Min</p>
-          <input
-            data-testid="leave-time-min"
-            type="time"
-            className="p-2 border rounded text-black"
-            defaultValue="12:00"
-            onChange={(e) => setMinTime(e.target.value)}
-          />
-        </div>
-
-        <div data-testid="leave-time-max-wrapper">
-          <p>Leave Time Max</p>
-          <input
-            data-testid="leave-time-max"
-            type="time"
-            className="p-2 border rounded text-black"
-            defaultValue="12:00"
-            onChange={(e) => setMaxTime(e.target.value)}
-          />
-        </div>
-        {!isLoading && (
-          <input type="submit" value="Submit" className="snazzy-submit" />
-        )}
-        {isLoading && <p>Loading result...</p>}
-
-        {submitCounter > 0 && !isLoading && <p>Time to leave: {bestTime}</p>}
-        {submitCounter > 0 && !isLoading && (
-          <p>Expected duration: {expectedDuration} minutes</p>
-        )}
-        <MapDisplay
-          sourceLocation={sourceCoordinates}
-          destinationLocation={destinationCoordinates}
-          submitCounter={submitCounter}
-        />
-      </form>
+      </div>
+        
+        
+      </div>
     );
     
 }
