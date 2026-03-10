@@ -81,8 +81,9 @@ export default defineConfig({
       stdout: 'pipe',
     },
     {
-      command: 'cd ../backend && python -m uvicorn main:app --port 8000',
-      url: 'http://localhost:8000/docs', // Playwright waits for this URL to be active
+      command: '.venv\\Scripts\\python -m uvicorn main:app --port 8000',
+      cwd: '../backend',
+      url: 'http://localhost:8000/docs',
       reuseExistingServer: !process.env.CI,
       stdout: 'pipe',
     },
