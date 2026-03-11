@@ -77,13 +77,18 @@ export default function MapDisplay({
         .addTo(mapInstance.current.mapLibreMap);
 
       if (!isTest) {
+        const bounds: [number, number][] = [
+          [Math.min(sourceLocation[0], destinationLocation[0]), Math.min(sourceLocation[1], destinationLocation[1])],
+          [Math.max(sourceLocation[0], destinationLocation[0]), Math.max(sourceLocation[1], destinationLocation[1])],
+        ];
         // Apply to the internal map engine
         mapInstance.current.mapLibreMap.fitBounds(
-          [sourceLocation, destinationLocation],
+          bounds,
           {
             padding: 50, // Pixels of "breathing room" around the markers
             duration: 2000, // Animation length in ms
-            //   essential: true, // Animation runs even if user prefers reduced motion
+            essential: true, // Animation runs even if user prefers reduced motion
+            
           },
         );
       }

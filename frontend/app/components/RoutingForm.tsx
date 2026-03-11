@@ -33,8 +33,8 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
     const [bestTime, setBestTime] = useState("");
     const [expectedDuration, setExpectedDuration] = useState("");
 
-    const [minTime, setMinTime] = useState<string>("12:00");
-    const [maxTime, setMaxTime] = useState<string>("12:00");
+    const [minTime, setMinTime] = useState<string>("07:00");
+    const [maxTime, setMaxTime] = useState<string>("09:00");
 
     const handleSubmit = async (
       src: string,
