@@ -4,6 +4,9 @@ import MapSearch from "./MapSearch";
 import MapDisplay from "./MapDisplay";
 
 export const sample = () => {console.log('submitted form')};
+export const TimeErrorMessage = "Make sure the earliest departure is before the latest departure!";
+export const SourceAddressNullErrorMessage = "Enter a source address!";
+export const DestinationAddressNullErrorMessage = "Enter a destination address!";
 
 interface RoutingFormProps {
   /** Callback function triggered when the form is submitted */
@@ -71,81 +74,105 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
       if (h1 == h2 && m1 < m2) return true;
       return false;
     };
+  
     const validateInput = () => {
-      return (
-        sourceAddress != null &&
-        destinationAddress != null &&
-        time1LessThanTime2(minTime, maxTime)
-      );
+      if (sourceAddress === null){
+        return SourceAddressNullErrorMessage
+      }
+      else if (destinationAddress === null){
+        return DestinationAddressNullErrorMessage
+      }
+      else if (!time1LessThanTime2(minTime, maxTime)){
+        return TimeErrorMessage
+      }
+      return "";
     };
 
     return (
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (validateInput()) {
-            await onSubmit(
-              sourceAddress!,
-              destinationAddress!,
-              minTime,
-              maxTime,
-            );
-          }
-        }}
-        className="space-y-3"
-      >
-        <div data-testid="source-wrapper">
-          <MapSearch
-            placeholderText="Source Address"
-            setAddress={setSourceAddress}
-            setCoordinates={setSourceCoordinates}
-          />
-        </div>
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-15">
+        <div className="p-6 dark:bg-zinc-800">
+          <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const validateResult = validateInput();
+            if (validateResult != ""){
+              alert(validateResult)
+            }
+            else {
+              await onSubmit(
+                sourceAddress!,
+                destinationAddress!,
+                minTime,
+                maxTime,
+              );
+            }
+          }}
+          className="space-y-3"
+        >
+          <div data-testid="source-wrapper">
+            <MapSearch
+              placeholderText="Source Address"
+              setAddress={setSourceAddress}
+              setCoordinates={setSourceCoordinates}
+            />
+          </div>
 
-        <div data-testid="destination-wrapper">
-          <MapSearch
-            placeholderText="Destination Address"
-            setAddress={setDestinationAddress}
-            setCoordinates={setDestinationCoordinates}
-          />
-        </div>
+          <div data-testid="destination-wrapper">
+            <MapSearch
+              placeholderText="Destination Address"
+              setAddress={setDestinationAddress}
+              setCoordinates={setDestinationCoordinates}
+            />
+          </div>
 
-        <div data-testid="leave-time-min-wrapper">
-          <p>Leave Time Min</p>
-          <input
-            data-testid="leave-time-min"
-            type="time"
-            className="p-2 border rounded text-black"
-            defaultValue="12:00"
-            onChange={(e) => setMinTime(e.target.value)}
-          />
-        </div>
+          <p>Time Range</p>
+          <div className="grid grid-cols-2">
+            <div data-testid="leave-time-min-wrapper" className="mr-6">
+              <p>Earliest Departure</p>
+              <input
+                data-testid="leave-time-min"
+                type="time"
+                className="p-2 border rounded text-black"
+                defaultValue="07:00"
+                onChange={(e) => setMinTime(e.target.value)}
+              />
+            </div>
+            <div data-testid="leave-time-max-wrapper" className="ml-6">
+              <p>Latest Departure</p>
+              <input
+                data-testid="leave-time-max"
+                type="time"
+                className="p-2 border rounded text-black"
+                defaultValue="09:00"
+                onChange={(e) => setMaxTime(e.target.value)}
+              />
+            </div>
+          </div>
+          {!isLoading && (
+            <input type="submit" value="Submit" className="snazzy-submit" />
+          )}
+          {isLoading && <p>Loading result...</p>}
 
-        <div data-testid="leave-time-max-wrapper">
-          <p>Leave Time Max</p>
-          <input
-            data-testid="leave-time-max"
-            type="time"
-            className="p-2 border rounded text-black"
-            defaultValue="12:00"
-            onChange={(e) => setMaxTime(e.target.value)}
-          />
+          {submitCounter > 0 && !isLoading && <p>Time to leave: {bestTime}</p>}
+          {submitCounter > 0 && !isLoading && (
+            <p>Expected duration: {expectedDuration} minutes</p>
+          )}
+          
+        </form>
         </div>
-        {!isLoading && (
-          <input type="submit" value="Submit" className="snazzy-submit" />
-        )}
-        {isLoading && <p>Loading result...</p>}
-
-        {submitCounter > 0 && !isLoading && <p>Time to leave: {bestTime}</p>}
-        {submitCounter > 0 && !isLoading && (
-          <p>Expected duration: {expectedDuration} minutes</p>
-        )}
-        <MapDisplay
-          sourceLocation={sourceCoordinates}
-          destinationLocation={destinationCoordinates}
-          submitCounter={submitCounter}
-        />
-      </form>
+        <div className="md:col-span-2 dark:bg-zinc-800">
+          <MapDisplay
+            sourceLocation={sourceCoordinates}
+            destinationLocation={destinationCoordinates}
+            submitCounter={submitCounter}
+          />
+          <p>Enter addresses in the form to see them on the map</p>
+        </div>
+      </div>
+        
+        
+      </div>
     );
     
 }
