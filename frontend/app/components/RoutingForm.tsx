@@ -132,7 +132,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
               data-testid="leave-time-min"
               type="time"
               className="p-2 border rounded text-black"
-              defaultValue="12:00"
+              defaultValue="07:00"
               onChange={(e) => setMinTime(e.target.value)}
             />
           </div>
@@ -143,7 +143,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
               data-testid="leave-time-max"
               type="time"
               className="p-2 border rounded text-black"
-              defaultValue="12:00"
+              defaultValue="09:00"
               onChange={(e) => setMaxTime(e.target.value)}
             />
           </div>
@@ -165,6 +165,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
             destinationLocation={destinationCoordinates}
             submitCounter={submitCounter}
           />
+          <p>Enter addresses in the form to see them on the map</p>
         </div>
       </div>
         
