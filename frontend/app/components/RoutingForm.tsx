@@ -126,26 +126,28 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
             />
           </div>
 
-          <div data-testid="leave-time-min-wrapper">
-            <p>Earliest Departure</p>
-            <input
-              data-testid="leave-time-min"
-              type="time"
-              className="p-2 border rounded text-black"
-              defaultValue="07:00"
-              onChange={(e) => setMinTime(e.target.value)}
-            />
-          </div>
-
-          <div data-testid="leave-time-max-wrapper">
-            <p>Latest Departure</p>
-            <input
-              data-testid="leave-time-max"
-              type="time"
-              className="p-2 border rounded text-black"
-              defaultValue="09:00"
-              onChange={(e) => setMaxTime(e.target.value)}
-            />
+          <p>Time Range</p>
+          <div className="grid grid-cols-2">
+            <div data-testid="leave-time-min-wrapper" className="mr-6">
+              <p>Earliest Departure</p>
+              <input
+                data-testid="leave-time-min"
+                type="time"
+                className="p-2 border rounded text-black"
+                defaultValue="07:00"
+                onChange={(e) => setMinTime(e.target.value)}
+              />
+            </div>
+            <div data-testid="leave-time-max-wrapper" className="ml-6">
+              <p>Latest Departure</p>
+              <input
+                data-testid="leave-time-max"
+                type="time"
+                className="p-2 border rounded text-black"
+                defaultValue="09:00"
+                onChange={(e) => setMaxTime(e.target.value)}
+              />
+            </div>
           </div>
           {!isLoading && (
             <input type="submit" value="Submit" className="snazzy-submit" />
