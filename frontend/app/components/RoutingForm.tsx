@@ -4,7 +4,7 @@ import MapSearch from "./MapSearch";
 import MapDisplay from "./MapDisplay";
 
 export const sample = () => {console.log('submitted form')};
-export const TimeErrorMessage = "Make sure the min time is before the max time!";
+export const TimeErrorMessage = "Make sure the earliest departure is before the latest departure!";
 export const SourceAddressNullErrorMessage = "Enter a source address!";
 export const DestinationAddressNullErrorMessage = "Enter a destination address!";
 
@@ -127,7 +127,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
           </div>
 
           <div data-testid="leave-time-min-wrapper">
-            <p>Leave Time Min</p>
+            <p>Earliest Departure</p>
             <input
               data-testid="leave-time-min"
               type="time"
@@ -138,7 +138,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
           </div>
 
           <div data-testid="leave-time-max-wrapper">
-            <p>Leave Time Max</p>
+            <p>Latest Departure</p>
             <input
               data-testid="leave-time-max"
               type="time"
