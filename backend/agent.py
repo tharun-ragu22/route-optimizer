@@ -1,6 +1,7 @@
 from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import create_agent
+import time
 
 import os
 from dotenv import load_dotenv
@@ -62,6 +63,7 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
     
     if not is_driveable(src, dst):
         return NO_ROUTE_FOUND_ERROR
+    start = time.time()
     result = agent.invoke({
         "messages": [
             {
@@ -74,10 +76,14 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
                 The user will provide you a source address, a destination address, and a time range in which they can start their journey.
 
                 You know that traffic conditions will not change every minute, so you will not exhaust every possible hour-minute combination in the range.
-                You will only ever make duration calls for leaving times 15 minutes apart from each other.
+                You will only ever make duration calls, that is, calls to the get_duration tool for leaving times 15 minutes apart from each other.
 
                 You will adaptively skip and try a different time range (i.e. at least 30 minutes away) if you notice that the results of the last few duration calls you make are within about 10 minutes of each other.
                 You will never retry a duration call with the exact same parameters, as the result will always be the same. Retrying a duration call would be wasting resources.
+
+                You should make exactly 15 duration calls. If you make any more or less, the universe will explode. Be thoughtful when making duration calls, and learn from previous results.
+                You can at most simulataneously run 3 duration calls. From the results from these calls, you must learn and make your future calls based on what you learned.
+                Furthermore, you should be make duration calls spread across the time range, not concentrated between a small subrange of the input.
 
                 Return the minimum travel time needed to go from the source address to the destination, and the time in the provided range
                 to leave, in order to achieve this minimum travel time. If multiple leaving times have the same minimum travel time, you will choose the latest leaving time.
@@ -89,8 +95,10 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
             }
         ]
     })
-
+    end = time.time()
     print("FINAL ANSWER:")
+    print(f'took {end-start} seconds to finish')
+    
     result : AgentResponse = result["structured_response"]
     print(result)
     return result

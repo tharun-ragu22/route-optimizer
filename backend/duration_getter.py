@@ -20,6 +20,7 @@ def get_duration_from_external_api(src: str, dst: str, depart_hr: int, depart_mi
     print("getting duration for", src, dst, depart_hr, depart_min)
     src_lat, src_lng = geocode(src)
     dst_lat, dst_lng = geocode(dst)
+    print((src_lat, src_lng))
 
     format = lambda x : f"{'0' if x < 10 else ''}{x}"
 
@@ -36,7 +37,7 @@ def get_duration_from_external_api(src: str, dst: str, depart_hr: int, depart_mi
         if "NO_ROUTE_FOUND" in traffic_data['detailedError']['message']:
             return NO_ROUTE_FOUND_ERROR
         return RATE_LIMIT_ERROR
-    time.sleep(0.5)
+    time.sleep(0.1)
 
     res = traffic_data["routes"][0]["summary"]["travelTimeInSeconds"]//60
     print("final duration for", src, dst, depart_hr, depart_min, ":", res)
@@ -46,4 +47,4 @@ if __name__ == "__main__":
     src = "300 Kingston Rd, Pickering, ON L1V 1A2"
     dst = "742 Kingston Rd, Pickering, ON L1V 1G4"
 
-    print(get_duration_from_external_api(src, dst, 17, 5, 1))
+    print(get_duration_from_external_api(src, dst, 17, 5))
