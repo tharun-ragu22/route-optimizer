@@ -19,6 +19,15 @@ test('short trip', async ({page}) => {
   await leaveTimeMax.pressSequentially('1100AM')
 
   // When the user hits submit
+  // Mock backend API response so test doesn't depend on external services
+  await page.route('**/get_best_time**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ best_time: '10:40', expected_duration: 12 }),
+    });
+  });
+
   const submitButton = await page.getByText(/submit/i)
   await submitButton.scrollIntoViewIfNeeded();
   await submitButton.click({ force: true })

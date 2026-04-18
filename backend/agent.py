@@ -7,7 +7,9 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from duration_getter import get_duration_from_external_api
+from geocoder import geocode
 import time
+from typing import Tuple
 from constants import RATE_LIMIT_ERROR, NO_ROUTE_FOUND_ERROR
 
 load_dotenv(override=False)
@@ -24,14 +26,15 @@ llm = ChatGoogleGenerativeAI(
 )
 TOMTOM_KEY = os.getenv("TOMTOM_API_KEY")
 @tool
-def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> AgentResponse:
+def get_duration(src_lat: float, src_lng: float, dst_lat: float, dst_lng: float, depart_hr: int, depart_min: int) -> AgentResponse:
     """
     Get how long it takes to travel from the source address to the destination address, if the trip starts at depart_hr:depart_min:depart_sec
 
     depart_hr represents the hour in a 24 hour time system (e.g. 17 instead of 5pm)
 
     """
-    
+    src = (src_lat, src_lng)
+    dst = (dst_lat, dst_lng)
     res =  get_duration_from_external_api(src, dst, depart_hr, depart_min)
     for i in range(3):
         if res == RATE_LIMIT_ERROR:
@@ -42,7 +45,7 @@ def get_duration(src: str, dst: str, depart_hr: int, depart_min: int) -> AgentRe
     return res
 
 
-def is_driveable(src:str, dst: str) -> bool:
+def is_driveable(src: Tuple[float, float], dst: Tuple[float, float]) -> bool:
     """Determines if it possible to drive from the source address to the destination address, by car"""
     res = get_duration_from_external_api(src, dst, 0, 0)
     for i in range(3):
@@ -61,7 +64,9 @@ agent = create_agent(llm, tools, response_format=AgentResponse)
 
 def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) -> int:
     
-    if not is_driveable(src, dst):
+    src_lat, src_lng = geocode(src)
+    dst_lat, dst_lng = geocode(dst)
+    if not is_driveable((src_lat, src_lng), (dst_lat, dst_lng)):
         return NO_ROUTE_FOUND_ERROR
     start = time.time()
     result = agent.invoke({
@@ -69,11 +74,11 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
             {
                 "role":"system",
                 "content":
-                """
+                f"""
                 You are a traffic commute agent who understands traffic trends in different cities around the world.
                 You are also conscious of resource usage, and will never use resources like tool calls more than necessary.
 
-                The user will provide you a source address, a destination address, and a time range in which they can start their journey.
+                The user will provide you a source location as a latitude, longitude tuple, a destination location as a latitude, longitude tuple, and a time range in which they can start their journey.
 
                 You know that traffic conditions will not change every minute, so you will not exhaust every possible hour-minute combination in the range.
                 You will only ever make duration calls, that is, calls to the get_duration tool for leaving times 15 minutes apart from each other.
@@ -91,7 +96,7 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
             },
             {
                 "role":"user",
-                "content": f"I am currently at {src}, and my destination is {dst}. I can start my journey between {time_leave_min} and {time_leave_max}"
+                "content": f"My source location is ({src_lat}, {src_lng}) and my destination location is ({dst_lat}, {dst_lng}). I can start my journey between {time_leave_min} and {time_leave_max}"
             }
         ]
     })
