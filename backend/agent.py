@@ -7,7 +7,6 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from duration_getter import get_duration_from_external_api
-from geocoder import geocode
 import time
 from typing import Tuple
 from constants import RATE_LIMIT_ERROR, NO_ROUTE_FOUND_ERROR
@@ -62,10 +61,7 @@ def is_driveable(src: Tuple[float, float], dst: Tuple[float, float]) -> bool:
 tools = [get_duration]
 agent = create_agent(llm, tools, response_format=AgentResponse)  
 
-def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) -> int:
-    
-    src_lat, src_lng = geocode(src)
-    dst_lat, dst_lng = geocode(dst)
+def get_best_time(src_lat: float, src_lng: float, dst_lat: float, dst_lng: float, time_leave_min: str, time_leave_max: str) -> int:
     if not is_driveable((src_lat, src_lng), (dst_lat, dst_lng)):
         return NO_ROUTE_FOUND_ERROR
     start = time.time()
@@ -85,8 +81,10 @@ def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) 
 
                 You will adaptively skip and try a different time range (i.e. at least 30 minutes away) if you notice that the results of the last few duration calls you make are within about 10 minutes of each other.
                 You will never retry a duration call with the exact same parameters, as the result will always be the same. Retrying a duration call would be wasting resources.
+                
+                Never make a duration call outside the provided time range, or else the universe will explode.
 
-                You should make exactly 15 duration calls. If you make any more or less, the universe will explode. Be thoughtful when making duration calls, and learn from previous results.
+                You should make at most 15 duration calls. Latency is very important. If you are confident that you have found the right answer, just return it. Be thoughtful when making duration calls, and learn from previous results.
                 You can at most simulataneously run 3 duration calls. From the results from these calls, you must learn and make your future calls based on what you learned.
                 Furthermore, you should be make duration calls spread across the time range, not concentrated between a small subrange of the input.
 

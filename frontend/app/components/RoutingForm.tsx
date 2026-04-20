@@ -11,8 +11,8 @@ export const DestinationAddressNullErrorMessage = "Enter a destination address!"
 interface RoutingFormProps {
   /** Callback function triggered when the form is submitted */
   onSubmit?: (
-    src: string, 
-    dst: string, 
+    src: [number, number], 
+    dst: [number, number], 
     time_leave_min: string, 
     time_leave_max: string
   ) => Promise<void> | null;
@@ -37,8 +37,8 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
     const [maxTime, setMaxTime] = useState<string>("09:00");
 
     const handleSubmit = async (
-      src: string,
-      dst: string,
+      src: [number, number],
+      dst: [number, number],
       time_leave_min: string,
       time_leave_max: string,
     ) => {
@@ -48,7 +48,7 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
 
       try {
         const response = await fetch(
-          `${baseUrl}/get_best_time?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`,
+          `${baseUrl}/get_best_time?src_lat=${src[1]}&src_lng=${src[0]}&dst_lat=${dst[1]}&dst_lng=${dst[0]}&time_leave_min=${encodeURIComponent(time_leave_min)}&time_leave_max=${encodeURIComponent(time_leave_max)}`,
           {
             method: "GET",
           },
@@ -101,8 +101,8 @@ export default function RoutingForm({ onSubmit, isLoading, setIsLoading }: Routi
             }
             else {
               await onSubmit(
-                sourceAddress!,
-                destinationAddress!,
+                sourceCoordinates!,
+                destinationCoordinates!,
                 minTime,
                 maxTime,
               );

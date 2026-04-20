@@ -1,4 +1,3 @@
-from geocoder import geocode
 from datetime import date
 import requests
 import os
@@ -41,8 +40,6 @@ def get_duration_from_external_api(src: Tuple[float, float], dst: Tuple[float, f
     return res
 
 if __name__ == "__main__":
-    src = "300 Kingston Rd, Pickering, ON L1V 1A2"
-    dst = "742 Kingston Rd, Pickering, ON L1V 1G4"
-    src_coords, dst_coords = geocode(src), geocode(dst)
+    src_coords, dst_coords = (43.809121399999995, -79.13123209999999), (43.8210944, -79.1137687)
 
     print(get_duration_from_external_api(src_coords, dst_coords, 17, 5))
