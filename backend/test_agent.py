@@ -5,7 +5,7 @@ from httpx import ASGITransport, AsyncClient
 from main import app
 
 @pytest.mark.asyncio
-async def test_get_best_time():
+async def test_get_best_time_happy_path():
     # Given pt B is driveable from pt A
     print('starting test')
     # return
@@ -14,8 +14,10 @@ async def test_get_best_time():
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         # Define the query parameters
         params = {
-            "src": "300 Kingston Rd, Pickering, ON L1V 1A2",
-            "dst": "742 Kingston Rd, Pickering, ON L1V 1G4",
+            "src_lat": 43.809121399999995,
+            "src_lng": -79.13123209999999,
+            "dst_lat": 43.8210944,
+            "dst_lng": -79.1137687,
             "time_leave_min": "17:00",
             "time_leave_max": "17:15",
         }
@@ -39,8 +41,10 @@ async def test_get_best_time_not_driveable():
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         
         params = {
-            "src": "300 Kingston Rd, Pickering, ON L1V 1A2",
-            "dst": "28 Thomas St, The Liberties, Dublin, D08 VF83, Ireland",
+           "src_lat": 43.809121399999995,
+            "src_lng": -79.13123209999999,
+            "dst_lat": 53.3431264,
+            "dst_lng": -6.2817019,
             "time_leave_min": "17:00",
             "time_leave_max": "17:15",
         }
@@ -50,6 +54,3 @@ async def test_get_best_time_not_driveable():
     # Then system tells them they cannot find a match
     print("response:", response)
     assert response.status_code == 400
-    # data = response.json()
-    # # assert data["source"] == "San Francisco"
-    # assert "best_time" in data

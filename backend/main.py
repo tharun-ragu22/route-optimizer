@@ -27,14 +27,18 @@ app.add_middleware(
 
 @app.get("/get_best_time")
 def get_best_time_endpoint(
-    src: str,
-    dst: str,
+    src_lat: float, 
+    src_lng: float, 
+    dst_lat: float, 
+    dst_lng: float,
     time_leave_min: str,
     time_leave_max: str
 ):
     
+    src = (src_lat, src_lng)
+    dst = (dst_lat, dst_lng)
     print('received request: ', src, dst, time_leave_min, time_leave_max)
-    res = get_best_time(src, dst, time_leave_min, time_leave_max)
+    res = get_best_time(src_lat, src_lng, dst_lat, dst_lng, time_leave_min, time_leave_max)
     if res == NO_ROUTE_FOUND_ERROR:
         raise HTTPException(status_code=400, detail=f"No route found between {src} and {dst}")
     return {'best_time': res.best_time, 'expected_duration': res.duration}

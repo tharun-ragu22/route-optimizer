@@ -62,10 +62,7 @@ def is_driveable(src: Tuple[float, float], dst: Tuple[float, float]) -> bool:
 tools = [get_duration]
 agent = create_agent(llm, tools, response_format=AgentResponse)  
 
-def get_best_time(src: str, dst: str, time_leave_min: str, time_leave_max: str) -> int:
-    
-    src_lat, src_lng = geocode(src)
-    dst_lat, dst_lng = geocode(dst)
+def get_best_time(src_lat: float, src_lng: float, dst_lat: float, dst_lng: float, time_leave_min: str, time_leave_max: str) -> int:
     if not is_driveable((src_lat, src_lng), (dst_lat, dst_lng)):
         return NO_ROUTE_FOUND_ERROR
     start = time.time()
